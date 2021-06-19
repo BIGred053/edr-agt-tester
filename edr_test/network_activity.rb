@@ -1,17 +1,18 @@
 require_relative 'logger/logfile'
 require_relative 'logger/process_logger'
+require_relative 'logger/network_activity_decorator'
 require 'net/http'
 require 'socket'
 require 'uri'
 
 module EDRTest
   class NetworkActivity
-    DEFAULT_URL = 'https://ptsv2.com/t/b76yt-1624085240/post'
+    DEFAULT_URL = 'https://ptsv2.com/t/a5nvm-1624086688/post'
     DEFAULT_DATA = '{ "foo": "bar" }'
 
     def initialize(logfile: nil)
       @logfile = logfile || EDRTest::Logger::Logfile.new
-      @logger = EDRTest::Logger::ProcessLogger.new
+      @logger = EDRTest::Logger::NetworkActivityDecorator.new(EDRTest::Logger::ProcessLogger.new)
     end
 
     attr_reader :logger, :logfile
@@ -23,24 +24,29 @@ module EDRTest
 
       Net::HTTP.post(uri, data, 'Keep-Alive' => 'timeout=5, max=10')
       net_stats = `netstat -nlb | grep #{url_ip}`
+      puts net_stats
+
+      return if net_stats.empty?
+
       net_info = net_stats.split(/\s+/)
 
-      source_details = ip_and_port(net_info[3])
-      dest_details = ip_and_port(net_info[4])
-      bytes_txed = net_info[-1]
-      txfer_protocol = net_info[0]
+      source_info = ip_and_port(net_info[3])
+      dest_info = ip_and_port(net_info[4])
+      bytes_sent = net_info[-1]
+      tx_protocol = net_info[0]
 
-      
-      @logfile.write(@logger.build_log(Process.pid))
+      @logfile.write(@logger.build_log(dest_info, source_info, bytes_sent, tx_protocol, Process.pid))
     end
 
     private
 
     def ip_and_port(addr)
       last_dot_idx = addr.rindex('.')
-      port = addr[last_dot_idx+1..-1]
+
       ip = addr[0...last_dot_idx]
-      [ip, port]
+      port = addr[last_dot_idx+1..-1]
+
+      { addr: ip, port: port }
     end
   end
 end
