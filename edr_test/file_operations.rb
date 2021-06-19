@@ -4,9 +4,9 @@ require_relative 'logger/process_logger'
 
 module EDRTest
   class FileOperations
-    def initialize(path:, filetype:)
+    def initialize(path:, filetype:, logfile: nil)
       @full_filename = path[-1] == '/' ? "#{path}test.#{filetype}" : "#{path}.#{filetype}"
-      @logfile = EDRTest::Logger::Logfile.new
+      @logfile = logfile || EDRTest::Logger::Logfile.new
       @logger = EDRTest::Logger::FileOperationsDecorator.new(EDRTest::Logger::ProcessLogger.new)
     end
 
