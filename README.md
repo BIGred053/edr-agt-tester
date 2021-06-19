@@ -8,3 +8,8 @@ Implemented Features:
  - Full Logging
 - Process Running
  - Full Logging
+- Network Activity
+  - Full Logging
+- Centralized Execution
+
+More details to be added as general follow-up
