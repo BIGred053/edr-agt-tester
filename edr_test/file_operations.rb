@@ -68,6 +68,8 @@ module EDRTest
       end
 
       my_file.logfile.stop_log
+    rescue StandardError
+      pr.logfile.stop_log
     end
 
     private
