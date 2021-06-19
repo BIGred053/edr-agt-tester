@@ -7,7 +7,7 @@ require 'uri'
 
 module EDRTest
   class NetworkActivity
-    DEFAULT_URL = 'https://ptsv2.com/t/a5nvm-1624086688/post'
+    DEFAULT_URL = 'https://www.google.com'
     DEFAULT_DATA = '{ "foo": "bar" }'
 
     def initialize(logfile: nil)
@@ -24,7 +24,6 @@ module EDRTest
 
       Net::HTTP.post(uri, data, 'Keep-Alive' => 'timeout=5, max=10')
       net_stats = `netstat -nlb | grep #{url_ip}`
-      puts net_stats
 
       return if net_stats.empty?
 
@@ -32,10 +31,16 @@ module EDRTest
 
       source_info = ip_and_port(net_info[3])
       dest_info = ip_and_port(net_info[4])
-      bytes_sent = net_info[-1]
+      bytes_sent = "#{net_info[-1]} bytes"
       tx_protocol = net_info[0]
 
       @logfile.write(@logger.build_log(dest_info, source_info, bytes_sent, tx_protocol, Process.pid))
+    end
+
+    def public_send_data
+      puts "Performing test network request..."
+      send_data
+      puts "Network test complete!"
     end
 
     private
