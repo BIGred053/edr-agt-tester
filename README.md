@@ -8,5 +8,3 @@ Implemented Features:
  - Full Logging
 - Process Running
  - Full Logging
-
-Work time thus far: 6/18 9:15 PM - 6/19 1:00 AM
