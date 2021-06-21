@@ -14,7 +14,7 @@ module EDRTest
     def initialize(logfile: nil, os: nil)
       @logfile = logfile || EDRTest::Logger::Logfile.new
       @logger = EDRTest::Logger::NetworkActivityDecorator.new(EDRTest::Logger::ProcessLogger.new)
-      @curr_os = os || set_os
+      @curr_os = os
     end
 
     attr_reader :logger, :logfile

@@ -22,7 +22,7 @@ module EDRTest
       elsif mac?
         :mac
       elsif linux?
-        :linux?
+        :linux
       else
         nil
       end
