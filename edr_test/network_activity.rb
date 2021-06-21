@@ -28,13 +28,11 @@ module EDRTest
 
       conn = Net::HTTP.new(url_ip)
       conn.start do |c|
-        c.post(uri.path, data)
-
         if OS.mac?
+          c.post(uri.path, data)
           net_stats = `netstat -nlb | grep #{url_ip}`
 
           return if net_stats.empty?
-          puts net_stats
           net_info = net_stats.split(/\s+/)
 
           source_info = ip_and_port(net_info[3])
@@ -42,15 +40,19 @@ module EDRTest
           bytes_sent = "#{net_info[-1]} bytes"
           tx_protocol = net_info[0]
         elsif OS.linux?
-          net_stats = `netstat -nlt | grep #{url_ip}`
+          net_stats = `netstat -tunpe --extend | grep #{url_ip}`
 
           return if net_stats.empty?
           puts net_stats
-
-          # source_info = ip_and_port(net_info[3])
-          # dest_info = ip_and_port(net_info[4])
-
-          # transfer_info = `sudo tcpdump -i eth0 -w /tmp/tcpdump.pcap host #{dest_info[:port]}`
+          net_info = net_stats.split(/\s+/)
+          source_info = ip_and_port(net_info[3])
+          dest_info = ip_and_port(net_info[4])
+          `sudo iptables -A INPUT -p tcp --sport #{source_info[:port]}`
+          c.post(uri.path, data)
+          ip_info = `sudo iptables -n -L OUTPUT -v`
+          bytes_sent = ip_info[/\d+\sbytes/]
+          puts bytes_sent
+          tx_protocol = net_info[0]
         end
       end
 
@@ -66,10 +68,11 @@ module EDRTest
     private
 
     def ip_and_port(addr)
-      last_dot_idx = addr.rindex('.')
+      port_delimiter_idx = addr.rindex('.') if OS.mac?
+      port_delimiter_idx = addr.rindex(':') if OS.linux?
 
-      ip = addr[0...last_dot_idx]
-      port = addr[last_dot_idx+1..-1]
+      ip = addr[0...port_delimiter_idx]
+      port = addr[port_delimiter_idx+1..-1]
 
       { addr: ip, port: port }
     end
