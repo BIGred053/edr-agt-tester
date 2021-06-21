@@ -23,16 +23,29 @@ module EDRTest
       source_ip = IPSocket.getaddress(Socket.gethostname)
 
       Net::HTTP.post(uri, data, 'Keep-Alive' => 'timeout=5, max=10')
-      net_stats = `netstat -nlb | grep #{url_ip}`
 
-      return if net_stats.empty?
+      if OS.mac?
+        net_stats = `netstat -nlb | grep #{url_ip}`
 
-      net_info = net_stats.split(/\s+/)
+        return if net_stats.empty?
 
-      source_info = ip_and_port(net_info[3])
-      dest_info = ip_and_port(net_info[4])
-      bytes_sent = "#{net_info[-1]} bytes"
-      tx_protocol = net_info[0]
+        net_info = net_stats.split(/\s+/)
+
+        source_info = ip_and_port(net_info[3])
+        dest_info = ip_and_port(net_info[4])
+        bytes_sent = "#{net_info[-1]} bytes"
+        tx_protocol = net_info[0]
+      elsif OS.linux?
+        net_stats = `netstat -nlt | grep #{url_ip}`
+
+        return if net_stats.empty?
+        puts net_stats
+
+        source_info = ip_and_port(net_info[3])
+        dest_info = ip_and_port(net_info[4])
+
+        # transfer_info = `sudo tcpdump -i eth0 -w /tmp/tcpdump.pcap host #{dest_info[:port]}`
+      end
 
       @logfile.write(@logger.build_log(dest_info, source_info, bytes_sent, tx_protocol, Process.pid))
     end
@@ -52,6 +65,24 @@ module EDRTest
       port = addr[last_dot_idx+1..-1]
 
       { addr: ip, port: port }
+    end
+  end
+
+  module OS
+    def OS.windows?
+      (/cygwin|mswin|mingw|bccwin|wince|emx/ =~ RUBY_PLATFORM) != nil
+    end
+  
+    def OS.mac?
+     (/darwin/ =~ RUBY_PLATFORM) != nil
+    end
+  
+    def OS.unix?
+      !OS.windows?
+    end
+  
+    def OS.linux?
+      OS.unix? and not OS.mac?
     end
   end
 end
