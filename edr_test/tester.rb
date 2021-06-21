@@ -1,12 +1,15 @@
 require_relative 'logger/logfile'
 require_relative 'file_operations'
 require_relative 'network_activity'
+require_relative 'os_finder'
 require_relative 'process_runner'
 
 module EDRTest
   class Tester
+
     def initialize
       @logfile = EDRTest::Logger::Logfile.new
+      @curr_os = OSFinder.set_os
     end
 
     def execute
@@ -29,7 +32,7 @@ module EDRTest
       @logfile.start_log
       EDRTest::ProcessRunner.new(logfile: @logfile).run_process # run and log default command
 
-      EDRTest::NetworkActivity.new(logfile: @logfile).send_data
+      EDRTest::NetworkActivity.new(logfile: @logfile, os: @curr_os).send_data
 
       fo = EDRTest::FileOperations.new(path: 'test', filetype: 'txt', logfile: @logfile)
       fo.create_file
@@ -51,7 +54,7 @@ module EDRTest
         when '1'
           EDRTest::ProcessRunner.new(logfile: @logfile).prompt_user
         when '2'
-          EDRTest::NetworkActivity.new(logfile: @logfile).public_send_data
+          EDRTest::NetworkActivity.new(logfile: @logfile, os: @curr_os).public_send_data
         when '3'
           EDRTest::FileOperations.new(path: 'test', filetype: 'txt', logfile: @logfile).prompt_user
         else
