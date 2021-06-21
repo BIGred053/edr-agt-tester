@@ -7,8 +7,8 @@ require 'uri'
 
 module EDRTest
   class NetworkActivity
-    DEFAULT_URL = 'https://www.google.com'
-    DEFAULT_DATA = '{ "foo": "bar" }'
+    DEFAULT_URL = 'https://ptsv2.com/t/4c7w5-1624299313/post'
+    DEFAULT_DATA = '{ "foo": "bar", "foo1": "bar1", "foo2": "bar2" }'
 
     def initialize(logfile: nil)
       @logfile = logfile || EDRTest::Logger::Logfile.new
@@ -21,30 +21,37 @@ module EDRTest
       uri = URI(url)
       url_ip = IPSocket::getaddress(uri.host)
       source_ip = IPSocket.getaddress(Socket.gethostname)
+      source_info = {}
+      dest_info = {}
+      bytes_sent = nil
+      tx_protocol = nil
 
-      Net::HTTP.post(uri, data, 'Keep-Alive' => 'timeout=5, max=10')
+      conn = Net::HTTP.new(url_ip)
+      conn.start do |c|
+        c.post(uri.path, data)
 
-      if OS.mac?
-        net_stats = `netstat -nlb | grep #{url_ip}`
+        if OS.mac?
+          net_stats = `netstat -nlb | grep #{url_ip}`
 
-        return if net_stats.empty?
+          return if net_stats.empty?
+          puts net_stats
+          net_info = net_stats.split(/\s+/)
 
-        net_info = net_stats.split(/\s+/)
+          source_info = ip_and_port(net_info[3])
+          dest_info = ip_and_port(net_info[4])
+          bytes_sent = "#{net_info[-1]} bytes"
+          tx_protocol = net_info[0]
+        elsif OS.linux?
+          net_stats = `netstat -nlt | grep #{url_ip}`
 
-        source_info = ip_and_port(net_info[3])
-        dest_info = ip_and_port(net_info[4])
-        bytes_sent = "#{net_info[-1]} bytes"
-        tx_protocol = net_info[0]
-      elsif OS.linux?
-        net_stats = `netstat -nlt | grep #{url_ip}`
+          return if net_stats.empty?
+          puts net_stats
 
-        return if net_stats.empty?
-        puts net_stats
+          # source_info = ip_and_port(net_info[3])
+          # dest_info = ip_and_port(net_info[4])
 
-        source_info = ip_and_port(net_info[3])
-        dest_info = ip_and_port(net_info[4])
-
-        # transfer_info = `sudo tcpdump -i eth0 -w /tmp/tcpdump.pcap host #{dest_info[:port]}`
+          # transfer_info = `sudo tcpdump -i eth0 -w /tmp/tcpdump.pcap host #{dest_info[:port]}`
+        end
       end
 
       @logfile.write(@logger.build_log(dest_info, source_info, bytes_sent, tx_protocol, Process.pid))
@@ -86,10 +93,3 @@ module EDRTest
     end
   end
 end
-
-na = EDRTest::NetworkActivity.new
-na.logfile.start_log
-
-na.send_data
-
-na.logfile.stop_log
