@@ -23,20 +23,20 @@ Unix commands:
 
 ## Getting Started
 ### Installation
-** 1) Install Git **
-====================
+**1) Install Git**
+
 The EDRTest utility can be copied to a local machine by downloading this git repository. For systems that do not already have `git` installed, the (Git website)[https://git-scm.com/book/en/v2/Getting-Started-Installing-Git] is a great place for guidance on the appropriate installation process for a given machine/OS. Once you have installed git, this repository can be cloned locally with the following command:
 
 ```
 git clone git@github.com:BIGred053/edr-agt-tester.git
 ```
 
-** 2) Install Ruby **
-=====================
+**2) Install Ruby**
+
 Ruby version 2.7 or above is recommended for this tool, both for optimal feature support, and general security best practice. (ruby-lang.org)[https://www.ruby-lang.org/en/documentation/installation/] is a great resource for determining the best installation source for Ruby for a given machine/OS.
 
-** 3) Double-check Unix Command Support **
-===========================================
+**3) Double-check Unix Command Support**
+
 EDRTest currently relies heavily on a few common Unix commands to provide some of the more granular details needed to capture meaningful logs. To ensure everything operates as intended, it is advisable to run the following commands on your machine to ensure that you have support for each:
 
 ```
@@ -52,7 +52,7 @@ sudo iptables -n -L OUTPUT -v
 
 If any of these utilities happen to not be supported by the OS of a given machine, packages such as [net-tools](https://net-tools.sourceforge.io) can be installed to add support.
 
-** Note: ** If you believe that additional Unix commands would provide valuable support within this utility, please open an Issue to share:
+**Note:** If you believe that additional Unix commands would provide valuable support within this utility, please open an Issue to share:
 - The command
 - Relevant options
 - Platform(s) supported
@@ -94,7 +94,7 @@ For File operations, the utility also logs:
 - Full path to the file being operated upon
 - The operation being performed
 
-** Note **: Modification and Deletion operations on non-existent files will not generate logs
+**Note**: Modification and Deletion operations on non-existent files will not generate logs
 
 For Network activity, the utility also logs:
 - Source Address and Port
