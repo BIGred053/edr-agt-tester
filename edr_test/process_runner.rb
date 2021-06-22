@@ -4,7 +4,7 @@ require 'open3'
 
 module EDRTest
   class ProcessRunner
-    DEFAULT_COMMAND = 'man git'
+    DEFAULT_COMMAND = 'ls -is'
     def initialize(logfile: nil)
       @logfile = logfile || EDRTest::Logger::Logfile.new
       @logger = EDRTest::Logger::ProcessLogger.new

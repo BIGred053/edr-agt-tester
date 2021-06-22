@@ -54,7 +54,7 @@ module EDRTest
         when '1'
           EDRTest::ProcessRunner.new(logfile: @logfile).prompt_user
         when '2'
-          EDRTest::NetworkActivity.new(logfile: @logfile, os: @curr_os).public_send_data
+          EDRTest::NetworkActivity.new(logfile: @logfile, os: @curr_os).run
         when '3'
           EDRTest::FileOperations.new(path: 'test', filetype: 'txt', logfile: @logfile).prompt_user
         else
