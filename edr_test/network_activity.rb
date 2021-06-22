@@ -62,7 +62,7 @@ module EDRTest
                      ))
     end
 
-    def public_send_data
+    def run
       puts 'Performing test network request...'
       send_data
       puts 'Network test complete!'
