@@ -9,7 +9,7 @@ This application is a simple test utility intended to support the Red Canary EDR
 
 All activity also captures logs in a JSON format, which can be used to compare relevant data to each activity type to that collected by the agent to regression test for consistency.
 
-EDRTest is written in Ruby and is intended to run with minimal additional requirements, if any.
+EDRTest is written in Ruby and is intended to run via the command line with minimal additional requirements, if any.
 
 ### Support
 EDR Test is written in Ruby, but also relies on some common Unix commands and tools. As such, this utility currently does not provide support for Windows machines.
